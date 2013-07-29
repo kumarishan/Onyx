@@ -75,9 +75,10 @@ def stemming = (rdd: RDD[String]): RDD[String]) = {
 
 /*
  * Important things about type T
- * 
+ * /
 class kMeans[T, U, M](epsilon: Float, centroids: Seq[T]) extends (RDD[T] => M[RDD[U]]) with Serializable {
   
+  // as defined in spark-KMeans by @ankurdave
   def apply(source: RDD[T])(implicit sim: Similarity[T], implicit avg: Average[T]) = {
     val clusters = (source
     .map(
@@ -91,7 +92,9 @@ class kMeans[T, U, M](epsilon: Float, centroids: Seq[T]) extends (RDD[T] => M[RD
       case (centroid, (pointSum, numPts)) => centroid -> pointSum / numPts
     }))
 
-    
+
+
+
   }
 
 }

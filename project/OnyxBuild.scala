@@ -3,6 +3,7 @@ import sbt.Classpaths.publishTask
 import Keys._
 import sbtassembly.Plugin._
 import AssemblyKeys._
+import com.typesafe.sbt.SbtStartScript
 
 object OnyxBuild extends Build {
 
@@ -48,7 +49,7 @@ object OnyxBuild extends Build {
 
 	def examplesSettings = commonSettings ++ Seq(
 		name := "onyx-examples"
-	) ++ assemblySettings ++ extraAssemblySettings
+	) ++ assemblySettings ++ extraAssemblySettings ++ SbtStartScript.startScriptForClassesSettings
 
 	def extraAssemblySettings() = Seq(test in assembly := {}) ++ Seq(
     mergeStrategy in assembly := {
