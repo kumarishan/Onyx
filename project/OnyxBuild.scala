@@ -43,12 +43,19 @@ object OnyxBuild extends Build {
 	def processingSettings = commonSettings ++ Seq(
 		name := "onyx-processing",
 		libraryDependencies ++= Seq(
-			"org.spark-project" % "spark-core_2.9.3" % "0.7.3"
+			"org.spark-project" % "spark-core_2.9.3" % "0.7.3",
+			 "org.scalanlp" % "chalk" % "1.2.0",
+			 "org.scalanlp" % "breeze-math_2.10" % "0.3"
 		)
 	) ++ assemblySettings ++ extraAssemblySettings
 
 	def examplesSettings = commonSettings ++ Seq(
-		name := "onyx-examples"
+		name := "onyx-examples",
+		libraryDependencies ++= Seq(
+			"org.apache.hadoop" % "hadoop-core" % "1.2.0",
+			"edu.stanford.nlp" % "stanford-corenlp" % "3.2.0",
+			"edu.washington.cs.knowitall.stanford-corenlp" % "stanford-postag-models" % "1.3.5"
+		)
 	) ++ assemblySettings ++ extraAssemblySettings ++ SbtStartScript.startScriptForClassesSettings
 
 	def extraAssemblySettings() = Seq(test in assembly := {}) ++ Seq(

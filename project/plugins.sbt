@@ -4,6 +4,10 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 resolvers += "Spray Repository" at "http://repo.spray.cc/"
 
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
+
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.5")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.3")

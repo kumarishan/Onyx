@@ -1,5 +1,7 @@
 *.class
 *.log
+*.seq
+*.seq.crc
 
 # sbt specific
 dist/*
