@@ -1,7 +1,7 @@
 package onyx.examples
 
 import java.io.File
-import java.io.StringReader
+import java.io.{StringReader, InputStream, FileInputStream}
 import java.net.URI
 
 import java.util.{Properties, UUID}
@@ -24,7 +24,15 @@ import edu.stanford.nlp.pipeline.{StanfordCoreNLP, Annotation}
 import edu.stanford.nlp.ling.CoreAnnotations._
 import edu.stanford.nlp.tagger.maxent.MaxentTagger
 
-class DocumentProcessing {
+import onyx.processing.tokenize._
+
+import opennlp.tools.tokenize.TokenizerModel
+
+/**
+ *
+ * @author Kumar Ishan (@kumarishan)
+ */
+object DocumentProcessing extends Serializable {
 
   def createSeqFile(){
     val files = new File("/tmp/gutenberg").listFiles
@@ -67,8 +75,8 @@ class DocumentProcessing {
     source.flatMap(d => {
       val props = new Properties
       props.put("annotators", "tokenize ssplit")
-      val tokenizer = new StanfordCoreNLP(props
-) 
+      val tokenizer = new StanfordCoreNLP(props)
+
       val docId = d._1.toString
       val docContent = d._2.toString
       val annotation = new Annotation(docContent)
@@ -117,18 +125,31 @@ class DocumentProcessing {
       s._1 -> s._2.split(" ").filter(w => (false /: allowedTags)((s, t) =>  s || w.split("_")(1).contentEquals(t))).toArray
     })
   }
-}
 
-object DocumentProcessing {
+  implicit def string2Tokenizable(s: String) = new Tokenizable[String]{
+    def text = s
+  }
+
+  def sparkProcess(){
+
+    // val modelIn: InputStream = new FileInputStream("opennlp-models/en-token.bin") with Serializable
+    // val tokenizer = TokenizerME[String](modelIn)
+
+    // var sc = new SparkContext("local", "spark-process")
+    // val source = sc.parallelize(List(
+    //   "Your hostname, prometheus resolves to a loopback address",
+    //   "if you need to bind to another address",
+    //   "registering blockManagerMaster")
+    // )
+
+    // tokenizer()(source).collect()
+  }
 
   def main(args: Array[String]){
-
-    val docProcess = new DocumentProcessing
-
     args(0) match {
-      case "create-seq" => docProcess.createSeqFile()
-      case "process-doc" => docProcess.processDoc()
-      case "combined-process" =>
+      case "create-seq" => createSeqFile()
+      case "process-doc" => processDoc()
+      case "spark-process" => sparkProcess()
     }
   }
 }
