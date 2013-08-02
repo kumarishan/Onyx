@@ -28,6 +28,8 @@ import onyx.processing.tokenize._
 
 import opennlp.tools.tokenize.TokenizerModel
 
+import com.twitter.algebird._
+
 /**
  *
  * @author Kumar Ishan (@kumarishan)
@@ -150,6 +152,14 @@ object DocumentProcessing extends Serializable {
       case "create-seq" => createSeqFile()
       case "process-doc" => processDoc()
       case "spark-process" => sparkProcess()
+      case "algebird" => {
+        val sc = new SparkContext("local", "algebird-serialization")
+  
+        val sv1 = AdaptiveVector.fromMap(Map(0 -> "kumar", 99 -> "ishan"), "", 100)
+        val sv2 = AdaptiveVector.fromMap(Map(10 -> "kumar", 50 -> "ishan"), "", 100)
+        val source = sc.parallelize(List(sv1, sv2))
+        source.map(t => 1 -> t).groupByKey.collect().map(println(_))
+      }
     }
   }
 }

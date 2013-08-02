@@ -22,23 +22,25 @@ private[pos] trait MaxEntPOSTagger extends POSTagger {
 }
 
 class SimpleMaxEntPOSTagger[K : ClassManifest]
-  extends (RDD[(K, Array[String] @@ Tokenized)] => RDD[(K, Array[String])])
+  extends (RDD[(K, Array[String] @@ Tokenized)] => RDD[(K, Array[String] @@ Tokenized)])
   with MaxEntPOSTagger with Serializable {
 
   def apply(source: RDD[(K, Array[String] @@ Tokenized)]) = {
     source.map(s => {
-      s._1 -> posTag(s._2)
+      s._1 -> Tag[Array[String], Tokenized](posTag(s._2))
     })
   }
 }
 
 class BatchMaxEntPOSTagger[K : ClassManifest]
-  extends (RDD[(K, Array[Array[String] @@ Tokenized])] => RDD[(K, Array[Array[String]])])
+  extends (RDD[(K, Array[Array[String] @@ Tokenized])] => RDD[(K, Array[Array[String] @@ Tokenized])])
   with MaxEntPOSTagger with Serializable {
 
   def apply(source: RDD[(K, Array[Array[String] @@ Tokenized])]) = {
     source.map(s => {
-      s._1 -> s._2.map(t => posTag(t)).toArray
+      s._1 -> s._2.map(t => 
+        Tag[Array[String], Tokenized](posTag(t))
+      ).toArray(manifest[Array[String] @@ Tokenized])
     })
   }
 }

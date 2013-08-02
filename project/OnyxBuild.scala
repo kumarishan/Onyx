@@ -44,11 +44,10 @@ object OnyxBuild extends Build {
 		name := "onyx-processing",
 		libraryDependencies ++= Seq(
 			"org.spark-project" % "spark-core_2.9.3" % "0.7.3",
-			 "org.apache.opennlp" % "opennlp-tools" % "1.5.3",
-			 "org.apache.opennlp" % "opennlp-maxent" % "1.5.3",
-			 "edu.stanford.nlp" % "stanford-corenlp" % "3.2.0",
-			 "org.scalanlp" % "breeze-math_2.10" % "0.3",
-			 "org.scalanlp" % "chalk" % "1.2.0"
+			"org.apache.opennlp" % "opennlp-tools" % "1.5.3",
+			"org.apache.opennlp" % "opennlp-maxent" % "1.5.3",
+			"edu.stanford.nlp" % "stanford-corenlp" % "3.2.0",
+			"com.twitter" % "algebird-core_2.9.2" % "0.1.13"
 		)
 	) ++ assemblySettings ++ extraAssemblySettings
 
