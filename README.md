@@ -1,10 +1,130 @@
 Onyx
 ====
+__[Testing and trying different desing .. definitely not to be used yet]__
 
 collection of libs to create text processing -> indexing -> searching pipeline
+look at design notes below as what you can expect
 
 Design Notes
 ============
+__updated 7th Aug 2013__  
+
+```
+onyx.core
+  pipeline
+    Chainable
+    
+  syntax
+    ChainSyntax
+  tools
+    StoreToHDFS
+  doc
+    Doc
+    Book
+    WebPage
+
+onyx.processing
+  tokenize
+    Tokenizer
+    WhitespaceTokenizer
+    RegexTokenizer
+    PTBTokenizer
+    Tokenizable
+  postag
+    POSTagger
+    MaxEntPOSTagger
+    BrillTagger
+    RegexTagger
+    NGramTagger
+    AffixTagger
+    NaiveBayesTagger
+    TntTagger
+  ner
+    NamedEntityRecognition
+  concordance
+  featurize
+    FeatureHashing
+  tfidf
+    TfIdfScoring
+  analyze
+    StopwordFiltering
+
+onyx.mining
+  clustering
+    KMeans
+    HierarchicalClustering
+  extraction
+    RAKE
+  modelling
+    LDA
+    
+
+onyx.indexing
+  LuceneIndex
+
+onyx.searching
+
+```
+__updated 3rd Aug 2013__  
+_(coded)_  
+
+_design modification_  
+the master or chaining orperator
+- |@| _(see if it compiles to the monadic operator)_ is also an alias for andThen
+- there are three variants of |@|
+  - ```|@|```
+  - ```|@| op(..) like |@| map(..), |@| flatMap(..)```
+    - rhs is always ```T => U```
+  - ```|@| parallelize(..) to create RDDs``` _just a syntactic sugar to sc.parallelize_ 
+- it operates on following kind of functions
+  - ```T => U```
+  - ```RDD[T] => RDD[U]```
+  - ```RDD[T] => U```
+  - ```RDD[T]```
+  - ```T```
+- valid application of the operator on above types
+  - ```RDD[T] => RDD[U] |@| op(U => V)```
+  - ```T => U |@| U => V```
+  - ```T => U |@| op(U => V)```
+  - ```RDD[T] => RDD[U] |@| RDD[U] => RDD[V]```
+  - ```T => U |@| parallelize(RDD[U] => RDD[V])```
+  - ```T |@| parallelize(RDD[T] => RDD[V])```
+  - ```RDD[T] |@| RDD[T] => RDD[V]```
+
+_spark process_ (RDD[T] => RDD[V])  
+spark process they always take RDD as input hence they are always combined using |@|
+
+_spark streaming process_ (to be added eventually)  
+
+_atomic process_ (T => V)  
+atomic process are those tat is to be applied to each RDD entries they dont work on RDDs but on data points itself. Hence they dont take RDDs as parameter.  
+Thus any proper third party apis can also be encapsulated inside a function and used
+But inorder to work with RDDs they combine using RDD operations like
+flatmap or map. Can be another other too
+
+_this way tomorrow we can een have storm process or hadoop process added too_  
+
+_chaining of atomic process_
+- ```tokenize |@| map(postag)``` in this tokenize output is converted to RDD and then map transformation is applied to the RDD and fed to postag (another atomic) process
+- ```tokenize |@| postag``` in this case no RDD is not involved in between tokenize and postag. The result of tokenize is directly fed to postag
+- ```tokenize |@| kmeans``` if either of the parameters of |@| is not a atomic process then ouput of the atomic process is RDD. In this case tokenize output is converted to RDD and then fed it to kmeans using Map as default
+- full fledged example
+
+```
+Book.hdfsSource("....")     // read books from a sequence file in hdfs
+  |@| Book.chapters         // split the book into chapters
+  |@| map(tokenize)           // tokenize each chapter 
+  |@| postag                // pos tag each chapter tokens
+  |@| {filterPosTag(_)}     // custom function to filter the postags
+  |@| map(featureHashing)     // use hashing trick to create sparse vector feature hash
+  |@| Book.combineChapters  // combine features of each chapters into one book
+  |@| kmeans                // do kmeans clustering on the books
+  |@| toHDFS                // store the cluster result to HDFS
+```
+
+|@| chain operator when used to combine them can be
+
+__old__
 
 _important initial design considerations_
 - functional style programming
