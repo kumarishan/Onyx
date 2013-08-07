@@ -11,9 +11,7 @@ __updated 7th Aug 2013__
 
 ```
 onyx.core
-  pipeline
-    Chainable
-    
+  Chainable
   syntax
     ChainSyntax
   tools
@@ -44,8 +42,7 @@ onyx.processing
   concordance
   featurize
     FeatureHashing
-  tfidf
-    TfIdfScoring
+    TfIdfWeighting
   analyze
     StopwordFiltering
 
@@ -111,15 +108,15 @@ _chaining of atomic process_
 - full fledged example
 
 ```
-Book.hdfsSource("....")     // read books from a sequence file in hdfs
-  |@| Book.chapters         // split the book into chapters
-  |@| map(tokenize)           // tokenize each chapter 
-  |@| postag                // pos tag each chapter tokens
-  |@| {filterPosTag(_)}     // custom function to filter the postags
-  |@| map(featureHashing)     // use hashing trick to create sparse vector feature hash
-  |@| Book.combineChapters  // combine features of each chapters into one book
-  |@| kmeans                // do kmeans clustering on the books
-  |@| toHDFS                // store the cluster result to HDFS
+Book.hdfsSource("....") |@|  // read books from a sequence file in hdfs
+  Book.chapters |@|          // split the book into chapters
+  map(tokenize) |@|          // tokenize each chapter 
+  postag |@|                 // pos tag each chapter tokens
+  {filterPosTag(_)} |@|      // custom function to filter the postags
+  map(featureHashing) |@|    // use hashing trick to create sparse vector feature hash
+  Book.combineChapters |@|   // combine features of each chapters into one book
+  kmeans |@|                 // do kmeans clustering on the books
+  toHDFS                     // store the cluster result to HDFS
 ```
 
 |@| chain operator when used to combine them can be

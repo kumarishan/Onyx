@@ -32,8 +32,10 @@ object OnyxBuild extends Build {
 	def coreSettings = commonSettings ++ Seq(
 		name := "onyx-core",
 		libraryDependencies ++= Seq(
-			"org.spark-project" % "spark-core_2.9.3" % "0.7.3"
-		) 
+			"org.spark-project" % "spark-core_2.9.3" % "0.7.3",
+			"org.apache.tika" % "tika-core" % "1.4",
+			"org.apache.tika" % "tika-parsers" % "1.4"
+		)
 	) ++ assemblySettings ++ extraAssemblySettings
 
 	def rootSettings = commonSettings ++ Seq(
