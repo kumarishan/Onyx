@@ -17,7 +17,7 @@ class FeatureHashing[T <% Tokenized[T, String]](numFeatures: Int) extends Featur
       else k + numFeatures/2 - 1
 
       featureVector(k)
-      featureVector = featureVector.updated(k, featureVector(k) + 1) 
+      featureVector = featureVector.updated(k, featureVector(k) + 1)
     })
     featureVector
   }

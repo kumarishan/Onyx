@@ -9,6 +9,7 @@ import tokenize._
 import tokenize.implicits._
 import pos._
 import featurize._
+import featurize.implicits._
 
 import org.apache.hadoop.io.Text
 
@@ -31,6 +32,7 @@ object OnyxCoreExamples {
     val tokenize = new PTBTokenizer[String]
     val posTag = new MaxEntPOSTagger[Array[String]]
     val featurize = new FeatureHashing[Array[String]](10000)
+    val tfIdf = new TfIdfWeighting[String, AdaptiveVector[Int], Int](3)
 
     val filterPOSTag = (s: Array[String]) => {
       val allowedTags = List(
@@ -44,6 +46,8 @@ object OnyxCoreExamples {
       s.filter(t => (false /: allowedTags)((s, a) => s || t.split("_")(1).contentEquals(a)))
     }
 
+    /* This is the Text processing pipeline */
+
     val processed =
       source |@|
       mapValues[Text, Text, Book](book.parse[Text]) |@|
@@ -52,9 +56,10 @@ object OnyxCoreExamples {
       mapValues[String, String, Array[String]](tokenize) |@|
       posTag |@|
       filterPOSTag |@|
-      featurize
+      featurize |@|
+      tfIdf
 
-    processed.getRDD.collect.foreach({s: (String, AdaptiveVector[Int]) => println(s._2.denseCount)})
+    processed.getRDD.collect.foreach({s: (String, TfIdfScore[Int]) => println(s._2.score.size)})
 
   }
 }
