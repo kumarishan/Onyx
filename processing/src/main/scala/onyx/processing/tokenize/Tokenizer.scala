@@ -18,3 +18,22 @@ abstract class Tokenizer[T <% Tokenizable[T], R] extends (T => Array[R]) with Se
     s.map(tokenize(_)).toArray
 
 }
+
+trait Tokenizable[T] {
+  def text: String
+}
+
+trait Tokenized[T, R] {
+  def tokens: Array[R]
+}
+
+object implicits {
+
+  implicit def arrayOfString2Tokenized(s: Array[String]) = new Tokenized[Array[String], String] {
+    def tokens = s
+  }
+
+  implicit def doubleArrOfStr2Tokenized(s: Array[Array[String]]) = new Tokenized[Array[Array[String]], String] {
+    def tokens = s.flatten
+  }
+}
