@@ -19,9 +19,9 @@ class TfIdfWeighting[K : ClassManifest, V <% TermCount[V, W], W : ClassManifest]
       d._2.termItr.map(wc => wc._1 -> (d._1 -> wc._2))
 
     }).groupByKey().flatMap(w => {
-      val idf = log(numberOfDocs / (w._2.size + 1))
+      val idf = log(numberOfDocs.toDouble / (w._2.size.toDouble + 1))
       w._2.map(d => {
-        d._1 -> (w._1 -> log1p(d._2) * idf)
+        d._1 -> (w._1 -> log1p(d._2.toDouble) * idf)
       })
 
     }).groupByKey().map(d => {

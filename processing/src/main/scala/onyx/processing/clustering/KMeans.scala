@@ -1,7 +1,3 @@
-/*
- * Simples KMeans clustering as described in @ankurdave spark-KMeans example
- */
-
 package onyx.processing.clustering
 
 import spark.SparkContext
@@ -22,7 +18,7 @@ import onyx.processing._
  * @param numClusters
  * @param maxIter
  * @param overclusteringFactor
- * @param epsilon   
+ * @param epsilon
  * @param skipEmptyCluster
  * @param initMethod
  *
@@ -31,7 +27,7 @@ import onyx.processing._
  * @see Distance, Average
  */
 class KMeans[T](
-    numClusters: Int, 
+    numClusters: Int,
     maxIter: Int,
     overclusteringFactor: Int,
     epsilon: Double,
@@ -60,7 +56,7 @@ class KMeans[T](
             centroid -> avg.avg(pointSum, numPts)
 				})
 			)
-			
+
       val newCentroids = {
         if(skipEmptyCluster) centroids
         else centroids.filter(clusters.contains(_))
@@ -88,13 +84,13 @@ class KMeans[T](
  * KMeans object provide easier instantiation of KMeans class
  */
 object KMeans {
-  
+
   def apply[T](
     epsilon: Double,
     skipEmptyCluster: Boolean,
     initMethod: (Int, RDD[T]) => Seq[T]
-  )(implicit m: ClassManifest[T], dist: Distance[T], avg: Average[T, Int, T, Int]) = 
-    (numClusters: Int, maxIter: Int, overclusteringFactor: Int) => 
+  )(implicit m: ClassManifest[T], dist: Distance[T], avg: Average[T, Int, T, Int]) =
+    (numClusters: Int, maxIter: Int, overclusteringFactor: Int) =>
       new KMeans[T](
         numClusters,
         maxIter,
@@ -102,5 +98,5 @@ object KMeans {
         epsilon,
         skipEmptyCluster,
         initMethod
-      ) 
+      )
 }

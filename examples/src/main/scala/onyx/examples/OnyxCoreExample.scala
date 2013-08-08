@@ -1,5 +1,7 @@
 package onyx.examples
 
+import java.util.UUID
+
 import onyx.core._
 import implicits._
 import syntax._
@@ -10,6 +12,7 @@ import tokenize.implicits._
 import pos._
 import featurize._
 import featurize.implicits._
+import clustering._
 
 import org.apache.hadoop.io.Text
 
@@ -26,6 +29,7 @@ object OnyxCoreExamples {
   }
 
   def main(args: Array[String]){
+
     val sc = new SparkContext("local", "onyx-core")
     val source = sc.sequenceFile[Text, Text]("hdfs://localhost:54310/usr/hduser/doc-processing-ex.seq")
 
@@ -59,7 +63,37 @@ object OnyxCoreExamples {
       featurize |@|
       tfIdf
 
-    processed.getRDD.collect.foreach({s: (String, TfIdfScore[Int]) => println(s._2.score.size)})
+    type Document = (String, TfIdfScore[Int])
+
+    implicit val docAverage = new Average[Document, Int, Document, Int]{
+      def numSum(a: Document, b: Document): Document = UUID.randomUUID.toString -> {
+          val am = a._2.score.toMap
+          val bm = b._2.score.toMap
+          val mm = am ++ bm.map{ case (k, v) => k -> (v + am.getOrElse(k, 0.0)) }
+          new TfIdfScore[Int](mm.toSeq)
+      }
+
+      def denomSum(a: Int, b: Int) = a + b
+      def avg(num: Document, denom: Int) = num._1 -> new TfIdfScore(num._2.score.map(w => w._1 -> w._2 / denom))
+    }
+
+    implicit val docDist = new Distance[Document]{
+      def distance(from: Document, to: Document): Double =
+        scala.math.sqrt((from._2.score zip to._2.score).foldLeft(0.0)((s, t) => s + (t._1._2 - t._2._2)*(t._1._2 - t._2._2)))
+    }
+
+    val initRandom: (Int, RDD[Document]) => Seq[Document] =
+      (n: Int, s: RDD[Document]) => s.takeSample(false, n, System.nanoTime.toInt)
+
+    val kmeans = KMeans[Document](0.001, true, initRandom)
+
+    processed.getRDD.cache()
+
+    val kmeansCentroid =
+      processed |@|
+      kmeans(2, 10, 1)
+
+    println(kmeansCentroid.mkString(" "))
 
   }
 }

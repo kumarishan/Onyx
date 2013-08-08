@@ -47,6 +47,7 @@ final class RDDChainOps[U](lhs: RDDChainable[U]) extends SpBaseChainOps(lhs)
 final class PairRDDChainOps[K, U](lhs: PairRDDChainable[K, U]) {
   def |@|[V : ClassManifest](rhs: SpPairTransOps[K, U, V]) = rhs.getChainable(lhs.getRDD)
   def |@|[V : ClassManifest](rhs: RDD[(K, U)] => RDD[(K, V)]) = PairRDDChainable(rhs(lhs.getRDD))
+  def |@|[V : ClassManifest](rhs: RDD[(K, U)] => V) = rhs(lhs.getRDD)
 }
 
 trait ChainOpsImplicits {
@@ -56,4 +57,5 @@ trait ChainOpsImplicits {
   implicit def rdd2Ops[U](lhs: RDD[U]) = new RDDChainOps(RDDChainable(lhs))
   implicit def rddPair2Ops[K, U](lhs: RDD[(K, U)]) = new PairRDDChainOps(PairRDDChainable(lhs))
   implicit def spPairChainable2Ops[K, U](lhs: SpPairTransChainable[K, U]) = new SpPairChainOps(lhs)
+  implicit def pairRDDChainable2Ops[K, U](lhs: PairRDDChainable[K, U]) = new PairRDDChainOps(lhs)
 }

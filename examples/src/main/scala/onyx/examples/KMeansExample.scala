@@ -9,7 +9,7 @@ import SparkContext._
 
 class Doc(_tokens: Map[String, Int]) extends Serializable {
   val tokens  = _tokens
-  
+
   def this(sentence: String) = this(
     sentence.split(" ").map(_ -> 1).foldLeft(Map[String, Int]())((m, token) => {
       m.updated(token._1, token._2 + m.get(token._1).getOrElse(0))
@@ -34,11 +34,11 @@ object KMeansExample {
         case None => m.updated(t._1, t._2)
       }
     }))
-    
+
     def denomSum(a: Int, b: Int) = a + b
     def avg(num: Doc, denom: Int) = new Doc(num.tokens.map({t => t._1 -> t._2 / denom}))
   }
-  
+
   implicit val docDist = new Distance[Doc]{
     private def compute(small: Map[String, Int], large: Map[String, Int]) = 
       scala.math.sqrt(
@@ -72,14 +72,14 @@ object KMeansExample {
 
     val source = s1File.map(
       t => {
-        val a = t.trim.split(" "); 
+        val a = t.trim.split(" ");
         Vector[Double]((a(0) + ".0").toDouble, (a(1) + ".0").toDouble)
       }
     )
 
-    val initRandom: (Int, RDD[Vector[Double]]) => Seq[Vector[Double]] = 
+    val initRandom: (Int, RDD[Vector[Double]]) => Seq[Vector[Double]] =
       (n: Int, s: RDD[Vector[Double]]) => s.takeSample(false, n, System.nanoTime.toInt)
-  
+
     val kmeans = KMeans[Vector[Double]](0.001, true, initRandom)
 
     source.cache()
