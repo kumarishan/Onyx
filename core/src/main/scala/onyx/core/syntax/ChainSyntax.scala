@@ -30,8 +30,9 @@ class SpBaseChainOps[U](lhs: Chainable[U]) {
 
 class SpPairChainOps[K, U](lhs: SpPairTransChainable[K, U]) {
   def |@|[V : ClassManifest](rhs: U => V) = lhs.append(rhs)
-  def |@|[K2: ClassManifest, V : ClassManifest](rhs: SpTransOps[(K, U), (K2, V)]) = rhs.getChainable(lhs.getRDD)
-  def |@|[K2: ClassManifest, V : ClassManifest](rhs: RDD[(K, U)] => RDD[(K2, V)]) = PairRDDChainable(rhs(lhs.getRDD))
+  def |@|[K2 : ClassManifest, V : ClassManifest](rhs: SpTransOps[(K, U), (K2, V)]) = rhs.getChainable(lhs.getRDD)
+  def |@|[K2 : ClassManifest, V : ClassManifest](rhs: RDD[(K, U)] => RDD[(K2, V)]) = PairRDDChainable(rhs(lhs.getRDD))
+  def |@|[V : ClassManifest](rhs: SpTransOps[(K, U), V]) = rhs.getChainable(lhs.getRDD)
 }
 
 final class SpTransChainOps[U](lhs: SpTransChainable[U]) extends SpBaseChainOps(lhs) {

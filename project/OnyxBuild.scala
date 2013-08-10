@@ -9,8 +9,10 @@ object OnyxBuild extends Build {
 
 	lazy val root = Project("root", file("."), settings = rootSettings) aggregate(core, examples, processing)
 	lazy val core = Project("core", file("core"), settings = coreSettings)
-	lazy val examples = Project("examples", file("examples"), settings = examplesSettings) dependsOn (core) dependsOn (processing)
+	lazy val examples = Project("examples", file("examples"), settings = examplesSettings) dependsOn (core) dependsOn (processing) dependsOn (indexing) dependsOn (mining)
 	lazy val processing = Project("processing", file("processing"), settings = processingSettings) dependsOn (core)
+	lazy val indexing = Project("indexing", file("indexing"), settings = indexingSettings) dependsOn (core)
+	lazy val mining = Project("mining", file("mining"), settings = miningSettings) dependsOn (core) dependsOn (processing)
 
 	def commonSettings = Defaults.defaultSettings ++ Seq(
 		organization := "io.onyx",
@@ -49,6 +51,23 @@ object OnyxBuild extends Build {
 			"org.apache.opennlp" % "opennlp-tools" % "1.5.3",
 			"org.apache.opennlp" % "opennlp-maxent" % "1.5.3",
 			"edu.stanford.nlp" % "stanford-corenlp" % "3.2.0",
+			"com.twitter" % "algebird-core_2.9.2" % "0.1.13"
+		)
+	) ++ assemblySettings ++ extraAssemblySettings
+
+	def indexingSettings = commonSettings ++ Seq(
+		name := "onyx-indexing",
+		libraryDependencies ++= Seq(
+			"org.spark-project" % "spark-core_2.9.3" % "0.7.3",
+			"org.apache.lucene" % "lucene-core" % "4.4.0",
+			"org.apache.lucene" % "lucene-analyzers-common" % "4.4.0",
+			"com.twitter" % "algebird-core_2.9.2" % "0.1.13"
+		)
+	) ++ assemblySettings ++ extraAssemblySettings
+
+	def miningSettings = commonSettings ++ Seq(
+		name := "onyx-mining",
+		libraryDependencies ++= Seq(
 			"com.twitter" % "algebird-core_2.9.2" % "0.1.13"
 		)
 	) ++ assemblySettings ++ extraAssemblySettings

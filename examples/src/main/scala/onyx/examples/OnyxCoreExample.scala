@@ -51,7 +51,6 @@ object OnyxCoreExamples {
     }
 
     /* This is the Text processing pipeline */
-
     val processed =
       source |@|
       mapValues[Text, Text, Book](book.parse[Text]) |@|
@@ -67,10 +66,10 @@ object OnyxCoreExamples {
 
     implicit val docAverage = new Average[Document, Int, Document, Int]{
       def numSum(a: Document, b: Document): Document = UUID.randomUUID.toString -> {
-          val am = a._2.score.toMap
-          val bm = b._2.score.toMap
-          val mm = am ++ bm.map{ case (k, v) => k -> (v + am.getOrElse(k, 0.0)) }
-          new TfIdfScore[Int](mm.toSeq)
+        val am = a._2.score.toMap
+        val bm = b._2.score.toMap
+        val mm = am ++ bm.map{ case (k, v) => k -> (v + am.getOrElse(k, 0.0)) }
+        new TfIdfScore[Int](mm.toSeq)
       }
 
       def denomSum(a: Int, b: Int) = a + b
@@ -85,7 +84,7 @@ object OnyxCoreExamples {
     val initRandom: (Int, RDD[Document]) => Seq[Document] =
       (n: Int, s: RDD[Document]) => s.takeSample(false, n, System.nanoTime.toInt)
 
-    val kmeans = KMeans[Document](0.001, true, initRandom)
+    val kmeans = KMeans[Document](0.0001, true, initRandom)
 
     processed.getRDD.cache()
 
