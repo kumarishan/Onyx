@@ -36,7 +36,7 @@ object OnyxCoreExamples {
     val tokenize = new PTBTokenizer[String]
     val posTag = new MaxEntPOSTagger[Array[String]]
     val featurize = new FeatureHashing[Array[String]](10000)
-    val tfIdf = new TfIdfWeighting[String, AdaptiveVector[Int], Int](3)
+    val tfIdf = new TfIdfWeighting[String, AdaptiveVector[Int], Int](10)
 
     val filterPOSTag = (s: Array[String]) => {
       val allowedTags = List(
@@ -58,9 +58,22 @@ object OnyxCoreExamples {
       map({s: (Text, Array[Byte]) => { s._1.toString -> new String(s._2)}}) |@|
       mapValues[String, String, Array[String]](tokenize) |@|
       posTag |@|
-      filterPOSTag |@|
-      featurize |@|
+      filterPOSTag
+
+    val cached = processed.cache
+
+    val featurizeTtfidf =
+      cached |@|
+      mapValues[String, Array[String], AdaptiveVector[Int]](featurize) |@|
       tfIdf
+
+    val tfIdf2 = new TfIdfWeighting[String, Array[String], String](10)
+
+    val tfidf =
+      cached |@|
+      tfIdf2
+
+    tfidf.collect().foreach(p => println(p._2.score))
 
     type Document = (String, TfIdfScore[Int])
 
@@ -89,7 +102,7 @@ object OnyxCoreExamples {
     processed.getRDD.cache()
 
     val kmeansCentroid =
-      processed |@|
+      featurizeTtfidf |@|
       kmeans(2, 10, 1)
 
     println(kmeansCentroid.mkString(" "))

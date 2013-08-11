@@ -50,4 +50,5 @@ sealed case class PairRDDChainable[K, V](s: RDD[(K, V)]) extends Chainable[(K, V
 
 trait ChainableImplicits {
   implicit def rdd2Chainable[T](r: RDD[T]) = RDDChainable(r)
+  implicit def Chainable2RDD[T](lhs: Chainable[T]) = lhs.getRDD
 }

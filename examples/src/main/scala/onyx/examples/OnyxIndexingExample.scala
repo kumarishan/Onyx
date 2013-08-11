@@ -42,4 +42,5 @@ object OnyxIndexingExample {
       map({s: (Text, Book) => s._2}) |@|
       indexer
   }
+
 }

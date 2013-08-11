@@ -12,4 +12,10 @@ object implicits {
   implicit def adVector2TermCount(a: AdaptiveVector[Int]) = new TermCount[AdaptiveVector[Int], Int]{
     def termItr = a.denseIterator
   }
+
+  implicit def arrayString2TermCount(s: Array[String]) = {
+    new TermCount[Array[String], String]{
+      def termItr = s.groupBy(p => p).map(t => t._1 -> t._2.foldLeft(0)((s, a) => s + 1)).toIterator
+    }
+  }
 }

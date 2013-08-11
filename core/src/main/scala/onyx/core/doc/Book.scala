@@ -16,6 +16,7 @@ class Book extends Doc with Serializable {
 
   var error: Boolean = false
   var errorMessage: String = ""
+  override def toString: String = title + " " + authors.mkString(" ") + " " + publisher + " " + content.size
 }
 
 object book {

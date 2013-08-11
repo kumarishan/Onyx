@@ -32,4 +32,3 @@ class LineTokenizer[T <% Tokenizable[T]](filter_blank_lines: Boolean = true, dis
 
 }
 
-

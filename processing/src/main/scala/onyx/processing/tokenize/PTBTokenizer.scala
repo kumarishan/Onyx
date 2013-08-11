@@ -26,6 +26,14 @@ import onyx.OnyxTags._
 class PTBTokenizer[V <% Tokenizable[V]] extends Tokenizer[V, String] {
 
   def tokenize(s: V) = {
+    val sent = new PTBSentenceTokenizer[V]
+    sent.tokenize(s).flatten
+  }
+}
+
+class PTBSentenceTokenizer[V <% Tokenizable[V]] extends Tokenizer[V, Array[String]] {
+
+  def tokenize(s: V) = {
     val props = new Properties
     props.put("annotators", "tokenize ssplit")
     val tokenizer = new StanfordCoreNLP(props)
@@ -40,6 +48,6 @@ class PTBTokenizer[V <% Tokenizable[V]] extends Tokenizer[V, String] {
         words.add(t.word)
       }
       words.toArray
-    }).toArray.flatten
+    }).toArray
   }
 }
