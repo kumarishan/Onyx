@@ -7,6 +7,101 @@ look at design notes below as what you can expect
 
 Design Notes
 ============
+
+__updated 5th Sept 2010__
+
+Sequence has following methods
+```
+iterator: Iterator[]
++(value: )
+++(values: Iterator[])
+
+__updated 14th Aug 2013__
+
+Sequence.... it stores and iterable data structure. Each item in the iterator can be of any type.  
+Idea is to allow each kind of Sequence to store in their own data structure. For example.  
+
+```
+tokenization -> bagOfWords -> featureHashing
+  = Array[String]   = Map[String, Int]  = SparseVector[Int] \(real ds\)
+  = TokenSequence   = WordCountSequence = FeatureHashSequence \(container\)
+
+sentenceSplit -> tokenization -> bagOfWords -> featureHashing
+  = Array[String]     = Array[String]  = Map[String, Int]  = SparseVector[Int] \(read ds\)
+  = SentenceSequence  = TokenSequence  = WordCountSequence = FeatureHashSequence \(container\)
+```
+
+With each item in the sequence there is a label attached. For example.. in case of POS, each token will have a POS tag.  
+A label is defined by its type and may or maynot have a value. For example in POS taggger each label is of Type POSTag and there values could be actual Tag like NN, DT, etc.
+While creating a new Sequence out of old through transformation. One can choose to preserve the old Label for example..  
+
+```
+val result =
+ sentenceSplit -> tokenization(preserveLabel) -> posTag(preserveLabel)
+  = Array[String]     = Array[String]             = Array[String]
+  = SentenceSequence  = TokenSequence             = TokenSequence
+  = Sentence          = Token, Sentence           = Token, Sentence, POSTag (labels)
+
+result -> bagOfWords
+            = Map[String, Int]
+            = WordCountSequence
+            = Token
+```
+what this means is that at the end. I can iterate through result using any sequence label.. for example I still want to iterate through Token, I can call result.iterator[Token] .. this will iterate through labels.. or result.iterator[Sentence] or result.iterator[POSTag] . If the corresponding Label is not preserved then the iterator returns and empty Iterator
+
+What label can be preserved is upto the transformer. for example the bagOfWords cannot preserver Sentence and also the Token label will also have a different behavior
+
+_now the question is how the previous token is stored ?_
+so first of all how we create a new Sequence by operating on previous and updating.  
+for eg tokenization takes any Sequence over String, iterates through them and then create new TokenSequence, which is a sequence over string itself.
+so if I have a tokenizer that takes a string and outputs array of String ie tokens..  
+
+```
+def tokenizer(s: String): Array[String] = ....
+inputSequence.iterator.foldLeft(new TokenSequence)((s, t) => s ++ tokenizer(s))
+ - <: Sequence[String]             - a new tokenSequence      - keep accumulating to the tokenSequence
+//or
+val tokens: Array[String] = inputSequence.iterator.flatMap(t => tokenizer(t))
+new TokenSequence(tokens) // appears to be better in peformance
+```
+
+well this is all good.. now if we want to store the previous label..
+
+_serialization_
+each type of sequence may register a custom serialization using Kryo
+
+__updated 13th Aug 2013__  
+_documents_ - every process is done on documents  
+Document uses Map[String, SegmentSeq] \(immutable\)  
+example: Book <: Document  
+- Book.parse(with\_chapters) or Book.parse(without\_chapters)
+for Book various fields could be authors, etc.. each field can be optionally tokenizable, used as feature.. etc..  
+for example.. while in clustering Book features that can be used .. authors, content's feature, important tags, etc..  
+in the above case every field will have its own feature vector(or any DS).. and thus when computing similarity of document similarity has to be calculated with correspding fields only.. and thus can be furhter combined to one score using weights..
+
+
+_tokenization_  
+at every segmentation or tokenization we produce another Seq of Tokens for each previous Seq of tokens
+for example - Book <: Document -> book.chapters -> paragraphs -> sentences -> tokens  
+here Book which is a document has multiple field... it may or maynot have chapters..  
+if it already is not subdivided into chapters.. then book.chapters uses field named content and get the ContentSeq which just now contains only one string ie the whole content. book.chapters will update this field content to ChapterSeq.
+
+next when paragraphs is applied.. it divided each chapter into into its paragraph...
+each of this operation returns the book only..  
+val book: Book = Book -> book.chapters -> paragraphSegmenter -> sentenceTokenizer -> ptbTokenizer..
+
+a simple example first...
+
+val sentence = "This is the first sentence. This is the sencond sentence."
+
+sentence -> sentenceTokenizer
+
+Token alias String
+TokenSeq implements scala.collection.Seq[Token] // cannot be lazy considering the distributed environment
+Annotation -> 
+AnnotatedTokenSeq[AnnotationType]
+
+
 __updated 7th Aug 2013__  
 
 ```

@@ -7,16 +7,31 @@ import org.apache.tika.metadata.{TikaCoreProperties, Metadata}
 import org.apache.tika.parser.{AutoDetectParser, ParseContext, Parser}
 import org.apache.tika.sax.BodyContentHandler
 
-class Book extends Doc with Serializable {
-  var authors = Array[String]()
-  var title: String = ""
-  var publisher: String = ""
+import Document._
 
-  var content = Array[Byte]()
+/**
+ * Book Document Type
+ *
+ * @author Kumar Ishan (@kumarishan)
+ */
+class Book(fieldTypes: FieldTypes, store: StoreType) extends DefaultDocument[Book](fieldTypes, store){
+  def this() = this(Map[FieldType, Set[String]](), Map[String, ContentSequence]())
+  override protected def mkInstance(fieldTypes: FieldTypes, store: StoreType): Book = new Book(fieldTypes, store)
 
-  var error: Boolean = false
-  var errorMessage: String = ""
-  override def toString: String = title + " " + authors.mkString(" ") + " " + publisher + " " + content.size
+  @deprecated("0.1.0", "")
+  def content: Array[Byte] = {get("content") match {
+    case Some(s) => s.asInstanceOf[ContentSequence].text.map(s => s.toByte)
+    case None => Array[Byte]()
+  }}
+
+  @deprecated("0.1.0", "")
+  var title = ""
+
+  @deprecated("0.1.0", "")
+  def authors: String = {get("authors") match {
+    case Some(s) => s.asInstanceOf[ContentSequence].text.mkString(" ")
+    case None => ""
+  }}
 }
 
 object book {
@@ -41,19 +56,18 @@ object book {
 
         parser.parse(bis, handler, metadata, new ParseContext())
 
-        val b = new Book
-        b.title = metadata.get(TikaCoreProperties.TITLE.getName)
-        b.authors = Array[String](metadata.get(TikaCoreProperties.CONTRIBUTOR.getName))
-        b.publisher = metadata.get(TikaCoreProperties.PUBLISHER.getName)
-        b.content = bas.toByteArray
-
-        b
+        new Book +
+          ("title" -> new ContentSequence(metadata.get(TikaCoreProperties.TITLE.getName)) ) +
+          ("authors" -> new ContentSequence(metadata.get(TikaCoreProperties.CONTRIBUTOR.getName)) ) +
+          ("publisher" -> new ContentSequence(metadata.get(TikaCoreProperties.PUBLISHER.getName)) ) +
+          ("content" -> new ContentSequence(bas.toString)) ++
+          ("title", Set[FieldType](Id, Store, Indexable)) ++
+          ("authors", Set[FieldType](IncludeInFeature, Store, Indexable)) ++
+          ("publisher", Set[FieldType](IncludeInFeature, Store, Indexable)) ++
+          ("content", Set[FieldType](IncludeInFeature, Indexable))
       } catch {
         case e: Exception => {
-          val b = new Book
-          b.error = true
-          b.errorMessage = e.getMessage
-          b
+          new Book
         }
       } finally {
         if(bis != null) bis.close

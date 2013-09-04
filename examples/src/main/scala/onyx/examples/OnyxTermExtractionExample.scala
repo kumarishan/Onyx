@@ -38,7 +38,8 @@ object OnyxTermExtractionExample {
       mapValues[String, Book, Array[(String, Double)]](termExtract)
 
     impTerms.getRDD.collect.foreach({s: (String, Array[(String, Double)]) =>
-      println(s._2.mkString("\n"))
+      println(s._2.filter(_._1.contains(" ")).mkString("\n"))
+      println("\n\n\n")
     })
   }
 }
