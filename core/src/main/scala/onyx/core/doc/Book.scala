@@ -15,7 +15,7 @@ import Document._
  * @author Kumar Ishan (@kumarishan)
  */
 class Book(fieldTypes: FieldTypes, store: StoreType) extends DefaultDocument[Book](fieldTypes, store){
-  def this() = this(Map[FieldType, Set[String]](), Map[String, ContentSequence]())
+  def this() = this(Map[FieldType, Set[String]](), Map[String, Sequence]())
   override protected def mkInstance(fieldTypes: FieldTypes, store: StoreType): Book = new Book(fieldTypes, store)
 
   @deprecated("0.1.0", "")

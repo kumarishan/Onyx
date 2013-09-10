@@ -10,8 +10,9 @@ import scala.collection.mutable.ArrayBuffer
 trait SeqLabel
 case object Token extends SeqLabel
 case object Sentence extends SeqLabel
+case object Content extends SeqLabel
 
-trait Sequence
+trait Sequence extends Serializable
 
 /**
  * It store an iterable data structure. Each item in the iterator is of type I.
@@ -24,6 +25,7 @@ abstract class Sequence0[D <: Sequence0[D, V], V] extends Sequence {
   self: D =>
 
   def iterator: Iterator[V]
+  def iterator(s: SeqLabel): Iterator[V]
   def +(value: V): D = updated0(value)
   def ++[U <: V](values: Iterator[U]): D = values.foldLeft(this)((s, t) => s + t)
 
@@ -80,6 +82,10 @@ abstract class MapSequence[A <: MapSequence[A, K, V], K, V] protected (ds: scala
  * @author Kumar Ishan (@kumarishan)
  */
 class TokenSequence private (ds: ArrayBuffer[String]) extends ArrayBufferSequence[TokenSequence, String](ds){
+  def iterator(s: SeqLabel) = s match {
+    case Token => iterator
+    case _ => Iterator.empty
+  }
   override protected def updated0(value: String) = new TokenSequence(ds.clone() += value)
 
   @deprecated("use iterator", "0.1.0")
@@ -93,6 +99,10 @@ class TokenSequence private (ds: ArrayBuffer[String]) extends ArrayBufferSequenc
  */
 class SentenceSequence private(ds: ArrayBuffer[String]) extends ArrayBufferSequence[SentenceSequence, String]{
   override protected def updated0(value: String) = new SentenceSequence(ds.clone() += value)
+  def iterator(s: SeqLabel) = s match {
+    case Sentence => iterator
+    case _ => Iterator.empty
+  }
 
   @deprecated("use iterator", "0.1.0")
   def text = ds.toArray
@@ -105,6 +115,11 @@ class SentenceSequence private(ds: ArrayBuffer[String]) extends ArrayBufferSeque
  */
 class ContentSequence (var ds: String) extends Sequence0[ContentSequence, String]{
   def iterator = Array[String](ds).iterator
+  def iterator(s: SeqLabel) = s match {
+    case Content => iterator
+    case _ => Iterator.empty
+  }
+
   def append(value: String): Unit = {ds = ds + value}
 
   override protected def updated0(value: String) = new ContentSequence(ds + value)

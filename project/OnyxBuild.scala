@@ -36,7 +36,8 @@ object OnyxBuild extends Build {
 		libraryDependencies ++= Seq(
 			"org.spark-project" % "spark-core_2.9.3" % "0.7.3",
 			"org.apache.tika" % "tika-core" % "1.4",
-			"org.apache.tika" % "tika-parsers" % "1.4"
+			"org.apache.tika" % "tika-parsers" % "1.4",
+			"org.apache.pdfbox" % "pdfbox" % "1.8.2"
 		)
 	) ++ assemblySettings ++ extraAssemblySettings
 
